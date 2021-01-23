@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[Insert title]</title>
+    <style>
+    :root {
+      --left-main-width: 50%;
+      --right-top-main-height: 30%;
+      --html-bg-color: #1c1c1c;
+      --whitish-color: #E6E1DC;
+    }
+    
+    body, html {
+      height: 100%;
+      margin: 0;
+      background-color: var(--html-bg-color);
+      color: var(--whitish-color);
+      font: 14px/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+    }
+        
+    
+    ::-webkit-scrollbar {
+      background-color: var(--html-bg-color);
+    }
+    ::-webkit-scrollbar-track {
+      background-color: var(--html-bg-color);
+    }
+    ::-webkit-scrollbar-thumb {
+      background-color: #404040; 
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: #505050;
+      cursor: pointer;
+    }
+    
+    main {
+      display: grid;
+      height:100%;
+      width:100%;
+      
+      grid-template: 
+      "left cl rthead" 2em
+      "left cl rtop"  var(--right-top-main-height)
+      "left cl rline" 2px
+      "left cl rbhead" 2em
+      "left cl rbot" auto 
+      / var(--left-main-width) 2px auto;
+    }
+    
+    #left-main {
+      grid-area: left;
+      overflow: auto;
+    }
+    
+    #right-top-header {
+      grid-area: rthead;
+      background-color: black;
+      border-bottom: 2px solid grey;
+      width:100%;
+      height:100%;
+    }
+    
+    #right-bot-header {
+      grid-area: rbhead;
+      background-color: black;
+      border-bottom: 2px solid grey;
+      width:100%;
+      height:100%;
+    }
+    
+    #right-top-main {
+      grid-area: rtop;
+      overflow: auto;
+      padding: 2px;
+      white-space: pre;
+    }
+    
+    #right-bot-main {
+      grid-area: rbot;
+      overflow: auto;
+    }
+    
+    #center-line-main {
+    	grid-area: cl;
+      background-color: grey;
+    }
+    
+    #right-line-main {
+    	grid-area: rline;
+      background-color: grey;
+    }
+    
+    #gutter{
+      float: left;
+      height: 100%;
+      width: 4ch;
+      padding-right: 1ch;
+      background-color: black;
+      color: grey;
+      text-align: right;
+      font: inherit;
+      overflow: hidden;
+      user-select: none;
+    }
+    #inner-gutter{
+      position: relative;
+      top: 0px;
+    }
+    
+    #editor-container {
+      position: relative;
+      float: right;
+      height: 100%;
+      width: calc(100% - 5ch);
+    }
+    
+    #editor-backdrop {
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      user-select: none;
+      white-space: pre;
+    }
+    
+    #inner-backdrop {
+      position: relative;
+      top: 0px;
+      left: 0px;
+    }
+    
+    #editor-textarea {
+      display: block;
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      background-color: transparent;
+      color: transparent;
+      caret-color: white;
+      margin: 0;
+      padding: 0;
+      resize: none;
+      border: none;
+      outline: none;
+      font: inherit;
+      white-space: pre;
+    }
+    
+    .status-span {
+      display: block;
+      float: left;
+      padding-left: 2px;
+      padding-top: 0.4em;
+      white-space: pre;
+    }
+    
+    .button-icon:hover {
+      cursor: pointer;
+    }
+    
+    .inactive-button {
+      opacity: 0.5;
+    }
+    
+    .inactive-button:hover {
+      cursor: auto;
+    }
+    
+    .scale-canvas-up {
+        image-rendering: pixelated; /* chrome, safari */
+        image-rendering: crisp-edges; /* firefox */
+    }
+    
+    </style>
+  </head>
+<body>
+<main>
+  <div id="left-main">
+    <div id="gutter" aria-hidden="true">
+      <div id="inner-gutter"></div>
+    </div>
+    <div id="editor-container">
+      <div id="editor-backdrop" aria-hidden="true"><div id="inner-backdrop"></div></div>
+      <textarea id="editor-textarea" autocomplete="off" spellcheck="false">Edit this banana slug</textarea>
+    </div>
+  </div>
+  <div id="right-top-header">
+    <span id="execution-status" class="status-span">Press Ctrl+Enter to run code</span>
+    <img class="button-icon inactive-button" src="stop-button.png" id="stop-button" style="height:80%; margin-top:2.5px; float:right;" title="stop execution (Ctrl+Backspace)">
+    <img class="button-icon" src="play-button.png" id="run-button" style="height:60%; margin-top:5px; float:right;" title="run code (Ctrl+Enter)">
+    <img class="button-icon" src="forward-button.png" id="gogo-button" style="height:80%; margin-top:2.5px; margin-right: 2px; float:right;" title="live programming mode (Ctrl+Shift+Enter)">
+  </div>
+  <div id="right-top-main"></div>
+  <div id="right-bot-header">
+    <span id="canvas-status" class="status-span">Canvas inactive</span>
+    <img class="button-icon inactive-button" src="plus-button.png" id="plus-button" style="height:60%; margin-top:5px; margin-right:4px; float:right;" title="zoom in (Ctrl+Scroll)">
+    <img class="button-icon inactive-button" src="minus-button.png" id="minus-button" style="height:60%; margin-top:5px; margin-right:8px; float:right;" title="zoom out (Ctrl+Scroll)">
+  </div>
+  <div id="right-bot-main">
+    <canvas id="visible-canvas" style="display:none;background-color:white;"></canvas>
+  </div>
+  <div id="center-line-main"></div>
+  <div id="right-line-main"></div>
+</main>
+<script type="module" src="content.js"></script>
+</body>
+</html>
+
