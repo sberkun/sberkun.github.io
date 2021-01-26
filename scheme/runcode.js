@@ -1,4 +1,4 @@
-import { reset_canvas, finish_canvas, draw_command } from './canvas.js';
+import { reset_canvas, finish_canvas, draw_from_buffer } from './canvas.js';
 
 let running = false; //alternates between true and false in live programming mode
 let live_programming = false;
@@ -28,6 +28,12 @@ function indicate_running(status){
     }
 }
 
+function add_output_text(text) {
+    let rtmain = document.getElementById("right-top-main");
+    let is_bottom = rtmain.scrollHeight - Math.abs(rtmain.scrollTop) === rtmain.clientHeight;
+    rtmain.innerText += text;
+    if(is_bottom) rtmain.scrollTop = rtmain.scrollHeight;
+}
 
 export function run_the_code() {
     if(running || live_programming) return;
@@ -93,7 +99,7 @@ function worker_message(e) {
         finish_canvas(); //because white is an eyesore
     }
     else if(e.data[0] == "display"){
-        document.getElementById("right-top-main").innerText += e.data[1];
+        add_output_text(e.data[1]);
     }
     else if(e.data[0] == "internalerror"){ //memory leak or something
         alert("internal error: open javascript console for details");
@@ -102,8 +108,13 @@ function worker_message(e) {
         myWorker.terminate();
         setWorker();
     }
+    else if(e.data[0] == "turtle"){
+        draw_from_buffer(e.data[1], e.data[2]);
+    }
     else {
-        draw_command(e.data);
+        alert("internal error: open javascript console for details");
+        console.log("internal error: invalid command from web worker");
+        console.log(cmd);
     }
 }
 

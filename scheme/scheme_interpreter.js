@@ -183,17 +183,12 @@ async function init(input) {
     imports.wbg.__wbg_reportinternalerror_69f965aca95feb34 = function(arg0, arg1) {
         report_internal_error(getStringFromWasm0(arg0, arg1));
     };
-    imports.wbg.__wbg_turtle0_984a69676d1dcfec = function(arg0, arg1) {
-        turtle_0(getStringFromWasm0(arg0, arg1));
+    imports.wbg.__wbg_turtlecmd_71911af43445ee89 = function(arg0, arg1, arg2, arg3) {
+        turtle_cmd(arg0 >>> 0, arg1, arg2, arg3);
     };
-    imports.wbg.__wbg_turtle2_7dfde3cce0bc8288 = function(arg0, arg1, arg2, arg3, arg4, arg5) {
-        turtle_2(getStringFromWasm0(arg0, arg1), getStringFromWasm0(arg2, arg3), getStringFromWasm0(arg4, arg5));
-    };
-    imports.wbg.__wbg_turtle1_82712b88ee8ad83a = function(arg0, arg1, arg2, arg3) {
-        turtle_1(getStringFromWasm0(arg0, arg1), getStringFromWasm0(arg2, arg3));
-    };
-    imports.wbg.__wbg_turtle3_05d0dee4d9435a3d = function(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
-        turtle_3(getStringFromWasm0(arg0, arg1), getStringFromWasm0(arg2, arg3), getStringFromWasm0(arg4, arg5), getStringFromWasm0(arg6, arg7));
+    imports.wbg.__wbg_colortonum_c3eb00eef38d50ab = function(arg0, arg1) {
+        var ret = color_to_num(getStringFromWasm0(arg0, arg1));
+        return ret;
     };
     imports.wbg.__wbg_log_eaf873d34587013d = function(arg0, arg1) {
         console.log(getStringFromWasm0(arg0, arg1));

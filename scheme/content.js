@@ -130,12 +130,20 @@ function global_handle_keydown(e) {
     }
 }
 
-(function load_saved_from_localstorage(){
-    if(localStorage.getItem("has_been_saved") != CHEESE_VERSION) return;
-    document.getElementById("editor-textarea").value = localStorage.getItem("textarea_content");
+
+function replace_all_text_on_initial_load(text){
+    document.getElementById("editor-textarea").value = text;
     editor_undoredo.save();
     add_gutter_numbers();
     make_visible_text();
+}
+
+(function initial_load_checker(){
+    if(localStorage.getItem("has_been_saved") != CHEESE_VERSION){
+        fetch("cheese_demo.scm").then(data => data.text()).then(replace_all_text_on_initial_load);
+    } else {
+        replace_all_text_on_initial_load(localStorage.getItem("textarea_content"));
+    }
 })();
 
 function save_to_localstorage(){

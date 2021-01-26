@@ -15,7 +15,6 @@ turtle_image.src = "turtle-tiny.png";
 
 let scaling_factor = 0; //default is 0=fit
 let canvas_used;
-let draw_calls;
 let exitonclick;
 let background_color;
 let turtle_visible;
@@ -127,7 +126,6 @@ export function reset_canvas(){
     ctx.fillStyle = "black";
     ctx.strokeStyle = "black";
     canvas_used = false;
-    draw_calls = 0;
     exitonclick = false;
     background_color = "white";
     turtle_visible = true;
@@ -224,32 +222,60 @@ function turtle_arc(radius, extent){
     turtle_y = centery - radius*Math.sin(turtle_dir*Math.PI/180);
 }
 
+function num_to_color(n){
+	if(isNaN(n) || n<0 || n>=256*256*256 || n%1 != 0){
+        alert("internal error: open javascript console for details");
+        console.log("internal error: invalid color: "+n);
+	    return "orangered"; //hopefully stands out
+    }
+    return "#"+n.toString(16).padStart(6,"0");
+}
 
-export function draw_command(cmd){
+const TCMD_NULL        = 0;
+const TCMD_BACKWARD    = 1;
+const TCMD_BEGIN_FILL  = 2;
+const TCMD_BGCOLOR     = 3;
+const TCMD_CIRCLE      = 4;
+const TCMD_CLEAR       = 5;
+const TCMD_COLOR       = 6;
+const TCMD_END_FILL    = 7;
+const TCMD_EXITONCLICK = 8;
+const TCMD_FORWARD     = 9;
+const TCMD_HIDETURTLE  = 10;
+const TCMD_LEFT        = 11;
+const TCMD_PENDOWN     = 12;
+const TCMD_PENUP       = 13;
+const TCMD_PIXEL       = 14;
+const TCMD_PIXELSIZE   = 15;
+const TCMD_RIGHT       = 16;
+const TCMD_SETHEADING  = 17;
+const TCMD_SETPOSITION = 18;
+const TCMD_SHOWTURTLE  = 19;
+
+function draw_command(name, s1, s2, s3){
     let angle = turtle_dir*Math.PI/180;
-    switch(cmd[0]) {
-        case "backward":
-            turtle_go_to(turtle_x - cmd[1]*Math.sin(angle), turtle_y - cmd[1]*Math.cos(angle));
+    switch(name) {
+        case TCMD_BACKWARD:
+            turtle_go_to(turtle_x - s1*Math.sin(angle), turtle_y - s1*Math.cos(angle));
             break;
-        case "begin_fill":
+        case TCMD_BEGIN_FILL:
             current_path = new Path2D();
             current_path.moveTo(OFFSET + 0.5 + turtle_x, OFFSET + 0.5 - turtle_y);
             break;
-        case "bgcolor":
-            background_color = cmd[1];
+        case TCMD_BGCOLOR:
+            background_color = num_to_color(s1);
             break;
-        case "circle":
-            if(cmd.length === 3) turtle_arc(cmd[1], cmd[2]);
-            else turtle_arc(cmd[1], 360);
+        case TCMD_CIRCLE:
+            turtle_arc(s1, s2);
             break;
-        case "clear":
+        case TCMD_CLEAR:
             ctx.clearRect(0, 0, DRAW_SIZE, DRAW_SIZE); //doesn't reset background or path btw
             break;
-        case "color":
-            ctx.strokeStyle = cmd[1];
-            ctx.fillStyle = cmd[1];
+        case TCMD_COLOR:
+            ctx.strokeStyle = num_to_color(s1);
+            ctx.fillStyle = num_to_color(s1);
             break;
-        case "end_fill":
+        case TCMD_END_FILL:
             if(current_path){
                 current_path.closePath();
                 ctx.fill(current_path);
@@ -257,49 +283,49 @@ export function draw_command(cmd){
             }
             current_path = false; //not necessary, but speeds up turtle_go_to
             break;
-        case "exitonclick":
+        case TCMD_EXITONCLICK:
             exitonclick = true;
             break;
-        case "forward":
-            turtle_go_to(turtle_x + cmd[1]*Math.sin(angle), turtle_y + cmd[1]*Math.cos(angle));
+        case TCMD_FORWARD:
+            turtle_go_to(turtle_x + s1*Math.sin(angle), turtle_y + s1*Math.cos(angle));
             break;
-        case "hideturtle":
+        case TCMD_HIDETURTLE:
             turtle_visible = false;
             break;
-        case "left":
-            turtle_dir -= cmd[1];
+        case TCMD_LEFT:
+            turtle_dir -= s1;
             break;
-        case "pendown":
+        case TCMD_PENDOWN:
             pendown = true;
             break;
-        case "penup":
+        case TCMD_PENUP:
             pendown = false;
             break;
-        case "pixel":
+        case TCMD_PIXEL:
             ctx.save();
-            ctx.fillStyle = cmd[3];
-            ctx.fillRect(OFFSET+pixelsize*cmd[1], OFFSET-pixelsize*cmd[2]+1-pixelsize, pixelsize, pixelsize);
+            ctx.fillStyle = num_to_color(s3);
+            ctx.fillRect(OFFSET+pixelsize*s1, OFFSET-pixelsize*s2+1-pixelsize, pixelsize, pixelsize);
             ctx.restore();
             break;
-        case "pixelsize":
-            pixelsize = cmd[1];
+        case TCMD_PIXELSIZE:
+            pixelsize = s1;
             break;
-        case "right":
-            turtle_dir += cmd[1];
+        case TCMD_RIGHT:
+            turtle_dir += s1;
             break;
-        case "setheading":
-            turtle_dir = cmd[1];
+        case TCMD_SETHEADING:
+            turtle_dir = s1;
             break;
-        case "setposition":
-            turtle_go_to(cmd[1], cmd[2]);
+        case TCMD_SETPOSITION:
+            turtle_go_to(s1, s2);
             break;
-        case "showturtle":
+        case TCMD_SHOWTURTLE:
             turtle_visible = true;
             break;
         default:
             alert("internal error: open javascript console for details");
-            console.log("internal error: invalid command from web worker");
-            console.log(cmd);
+            console.log("internal error: invalid turtle command");
+            console.log([name, s1, s2, s3]);
             
         //handled on backend:
             //rgb, screen_width, screen_height
@@ -308,8 +334,20 @@ export function draw_command(cmd){
         //all aliases are handled on backend
             
     }
-    
-    draw_calls++;
-    if(draw_calls < 5 || draw_calls % 500 == 0) //for UI performance
-        copy_to_visible_canvas();
 }
+
+export function draw_from_buffer(n, buffy){
+    let commands_buffer = new Float64Array(buffy);
+    for(let a=0;a<n;a++) {
+        draw_command(
+            commands_buffer[4*a + 0],
+            commands_buffer[4*a + 1],
+            commands_buffer[4*a + 2],
+            commands_buffer[4*a + 3]
+        );
+    }
+    copy_to_visible_canvas();
+}
+
+
+
