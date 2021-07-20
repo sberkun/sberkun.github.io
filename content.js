@@ -1,6 +1,9 @@
+
+let GLOBAL_USE_HTML = false;
 document.getElementById("inpform").onsubmit = function(e) {
     e.preventDefault();
     if(this.inp.value !== "") {
+        GLOBAL_USE_HTML = false;
         changeText(findResponse(this.inp.value));
         this.inp.value = "";
     }
@@ -25,14 +28,19 @@ function findResponse(input) {
             }
         }
     }
-    return "Sorry, I didn't understand that. If you would like a few example commands, type \"help\".";
+    GLOBAL_USE_HTML = true;
+    return "Sorry, I didn't understand that. You can type \"help\" for some examples,"+
+        " or go to my <a href=\"/about.html\">profile</a> or <a href=\"projects.html\">project</a> pages to learn more about me.";
 }
 
 
 function changeText(s) {
-    document.getElementById("inner").innerText = s;
+    if(GLOBAL_USE_HTML) {
+        document.getElementById("inner").innerHTML = s;
+    } else {
+        document.getElementById("inner").innerText = s;
+    }
 }
-
 
 const EX = 0; //exact match
 const SW = 1; //starts with
