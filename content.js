@@ -1,4 +1,38 @@
 
+function changeColors(bg_color, text_color, s_color) {
+    document.documentElement.style.setProperty('--bg-color', bg_color);
+    document.documentElement.style.setProperty('--text-color', text_color);
+    document.documentElement.style.setProperty('--secondary-text-color', s_color);
+}
+function changeToLight() {
+    changeColors("#ffffff", "#4a4a4a", "#80858f");
+    localStorage.setItem("color_mode", "light");
+    document.getElementById("color-mode-btn").innerText = "dark mode";
+    document.getElementById("color-mode-btn").onclick = function(e) {
+        e.preventDefault();
+        changeToDark();
+    };
+}
+function changeToDark() {
+    changeColors("#1e2329", "#adbac7", "#757575");
+    localStorage.setItem("color_mode", "dark");
+    document.getElementById("color-mode-btn").innerText = "light mode";
+    document.getElementById("color-mode-btn").onclick = function(e) {
+        e.preventDefault();
+        changeToLight();
+    };
+}
+var savedMode = localStorage.getItem("color_mode");
+if(savedMode === "light") {
+    changeToLight();
+} else { //dark is default
+    changeToDark();
+}
+
+
+
+
+
 let GLOBAL_USE_HTML = false;
 document.getElementById("inpform").onsubmit = function(e) {
     e.preventDefault();
@@ -68,18 +102,23 @@ const responses = [
     [SW, "python3", pythonFunction],
     [INC, "snake", pythonFunction],
     [INC, "pong", pongFunction],
+    [INC, "shower", randomFunction], //shower thought
     [INC, "random", randomFunction],
+    [INC, "ai", machinelearning("Artificial intelligence")],
+    [INC, "ml", machinelearning("Machine learning")],
+    [INC, "data", machinelearning("Big Data\u2122")],
+    [INC, "artificial intelligence", machinelearning("Artificial intelligence")],
+    [INC, "machine learning", machinelearning("Machine learning")],
+    [INC, "light", (i) => {changeToLight(); return "light mode enabled!"}],
+    [INC, "dark", (i) => {changeToDark(); return "dark mode enabled!"}],
+    [INC, "wow", "I'm glad you like it!"],
+    [INC, "cool", "I'm glad you like it!"],
     [INC, "profile", (i) => {location.href = "/about.html";}],
     [INC, "about", (i) => {location.href = "/about.html";}],
     [INC, "contact", (i) => {location.href = "/about.html";}],
     [INC, "projects", (i) => {location.href = "/projects.html";}],
     [INC, "project", (i) => {location.href = "/projects.html";}],
     [INC, "lesson", (i) => {location.href = "http://paulgraham.com/lesson.html";}],
-    [INC, "ai", machinelearning("Artificial intelligence")],
-    [INC, "ml", machinelearning("Machine learning")],
-    [INC, "data", machinelearning("Big Data\u2122")],
-    [INC, "artificial intelligence", machinelearning("Artificial intelligence")],
-    [INC, "machine learning", machinelearning("Machine learning")],
 ];
 
 let cheese_counter = 0;
