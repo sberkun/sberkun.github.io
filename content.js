@@ -55,7 +55,7 @@ function findResponse(input) {
                 return res[2];
             } else {
                 let cool = res[2](input);
-                if(typeof cool == "string") {
+                if(typeof cool != "undefined") {
                     return cool;
                 }
                 return "loading...";
@@ -63,14 +63,17 @@ function findResponse(input) {
         }
     }
     GLOBAL_USE_HTML = true;
-    return "Sorry, I didn't understand that. You can type \"help\" for some examples,"+
+    let retEl = document.createElement("div");
+    retEl.innerHTML = "Sorry, I didn't understand that. You can type \"help\" for some examples,"+
         " or go to my <a href=\"/about.html\">profile</a> or <a href=\"projects.html\">project</a> pages to learn more about me.";
+    return retEl;
 }
 
 
 function changeText(s) {
+    document.getElementById("inner").innerHTML = "";
     if(GLOBAL_USE_HTML) {
-        document.getElementById("inner").innerHTML = s;
+        document.getElementById("inner").appendChild(s);
     } else {
         document.getElementById("inner").innerText = s;
     }
@@ -80,15 +83,15 @@ const EX = 0; //exact match
 const SW = 1; //starts with
 const INC = 2; //includes
 const responses = [
-    [SW, "echo", (i) => i.substring(i.indexOf("echo")+4)],
+    [SW, "echo", (i) => i.substring(i.toLowerCase().indexOf("echo")+4)],
     [SW, "ls", "cheese.txt\ncheese2.txt\n.gitlet"],
     [SW, "top", "top: command not found"],
     [SW, "htop", "htop: command not found"],
     [EX, "something", "Well, that certainly is something."],
-    [SW, "cd", (i) => "cd:" + i.substring(i.indexOf("cd")+2) + ": Permission denied"],
+    [SW, "cd", (i) => "cd:" + i.substring(i.toLowerCase().indexOf("cd")+2) + ": Permission denied"],
     [SW, "rm", "Successfully deleted everything!"],
-    [SW, "go to", (i) => {location.href = i.substring(i.indexOf("to")+2);}],
-    [SW, "goto", (i) => {location.href = i.substring(i.indexOf("to")+2);}],
+    [SW, "go to", (i) => {location.href = i.substring(i.toLowerCase().indexOf("to")+2);}],
+    [SW, "goto", (i) => {location.href = i.substring(i.toLowerCase().indexOf("to")+2);}],
     [INC, "cheese", cheeseFunction],
     [INC, "help", "Here are some example commands you can try out:\nhelp\necho [something]\npython\ncheese\nprojects"],
     [INC, "hi", "Hi! Nice to meet you :)"],
@@ -137,9 +140,24 @@ function pythonFunction(input) {
 }
 
 function pongFunction(input) {
-    console.log("unimplemented!");
-    return "Coming soon!";
+    GLOBAL_USE_HTML = true;
+    let myCanvas = document.createElement("canvas");
+    myCanvas.style.width = "min(80vw, 80vh)";
+    myCanvas.style["background-color"] = "black";
+    myCanvas.onclick = startPong;
+
+    let ctx = myCanvas.getContext("2d");
+    ctx.fillStyle = "white";
+    ctx.fillRect(10.5, 10.5, 10, 10);
+
+    return myCanvas;
 }
+
+function startPong() {
+
+
+}
+
 
 function machinelearning(which) {
     return which + " is a social construct, perputuated by data scientists "
