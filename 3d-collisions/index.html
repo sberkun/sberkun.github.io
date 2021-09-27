@@ -1,0 +1,50 @@
+
+<!DOCTYPE html>
+<html>
+  <head><style>
+    body, html {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+    }
+    .canvas-box{height:0px;}
+    #settingsbutton{
+      position: absolute; 
+      top:10px; 
+      right: 10px; 
+      width: 50px;
+      height: 50px;
+      background-image:url('settingsicon.png');
+      background-color:white;
+      background-position: center; 
+      background-repeat: no-repeat; 
+      background-size: cover; 
+      border:none;
+      cursor:pointer;
+    }
+    #settingsmenu{
+      position: absolute;
+      top: 70px;
+      right: 10px;
+      border: 1px solid black;
+      border-radius: 6px;
+      padding: 5px;
+    }
+    .hidden{
+      display:none;
+    }
+  </style></head>
+  <body>
+    <div class="canvas-box" onmousedown="settingsmenu.classList.add('hidden')" ontouchstart="settingsmenu.classList.add('hidden')"><canvas id="myCanvas">Your browser does not support canvas elements.</canvas></div>
+    <p id="score" style="text-align:center;"></p>
+    <button id="settingsbutton" onclick="settingsmenu.classList.toggle('hidden')" ontouchstart="settingsmenu.classList.toggle('hidden');event.preventDefault();"></button>
+    <div id="settingsmenu" class="hidden">
+      <p style="text-align:center;">Lens angle:</p>
+      <input id="lensSlider" type="range" min="-200" max="100" value="-69">
+    </div>
+    <script src="setup.js"></script>
+    <script src="graphics.js"></script>
+    <script src="content.js"></script>
+  </body>
+</html>
+
