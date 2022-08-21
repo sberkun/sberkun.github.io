@@ -164,14 +164,14 @@ async function load(module, imports) {
 function getImports() {
     const imports = {};
     imports.wbg = {};
-    imports.wbg.__wbg_log_66c247640bd6be36 = function(arg0, arg1) {
-        console.log(getStringFromWasm0(arg0, arg1));
-    };
     imports.wbg.__wbg_drawrectangle_2b93a014ec9635f3 = function(arg0, arg1, arg2, arg3, arg4, arg5) {
         draw_rectangle(arg0, arg1, arg2, arg3, getStringFromWasm0(arg4, arg5));
     };
     imports.wbg.__wbg_drawtext_67018bbd9a9d78d0 = function(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
         draw_text(getStringFromWasm0(arg0, arg1), arg2, arg3, getStringFromWasm0(arg4, arg5), getStringFromWasm0(arg6, arg7));
+    };
+    imports.wbg.__wbg_log_66c247640bd6be36 = function(arg0, arg1) {
+        console.log(getStringFromWasm0(arg0, arg1));
     };
     imports.wbg.__wbg_setcanvassize_9707f30ae8776118 = typeof set_canvas_size == 'function' ? set_canvas_size : notDefined('set_canvas_size');
     imports.wbg.__wbg_requestanimationframe_5fb1dd4225ca5630 = typeof request_animation_frame == 'function' ? request_animation_frame : notDefined('request_animation_frame');
