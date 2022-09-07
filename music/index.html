@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <head>
+      <meta charset="utf-8" />
+      <title>Music</title>
+      <link rel="icon" type="image/x-icon" href="/public/icons8-cheese-64.png">
+    </head>
+    <style>
+      .content {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    
+    <div class="content">
+      <h1>Music</h1>
+      <div>
+        <button id="audiobtn1">A (440 Hz)</button>
+        <button id="audiobtn2">C (523 Hz)</button>
+      </div>
+      <br>
+      <div hidden>
+        <button id="audiobtn3">TTFAF</button>
+      </div>
+    </div>
+
+    <script type="module">
+      import setup from "./public/main.js";
+      let btn1_pressed = false;
+      let btn2_pressed = false;
+
+      function try_reveal() {
+        if (btn1_pressed && btn2_pressed) {
+          document.getElementById("audiobtn3").parentElement.hidden = false;
+        }
+      }
+
+      function btn1() {
+        btn1_pressed = true;
+        try_reveal();
+      }
+
+      function btn2() {
+        btn2_pressed = true;
+        try_reveal();
+      }
+
+      setup([
+        ["audiobtn1", 0.996, false, 440, btn1],
+        ["audiobtn2", 0.996, false, 523, btn2],
+        ["audiobtn3", 0.996, true, 0, () => {}],
+      ]);
+    </script>
+  </body>
+</html>
