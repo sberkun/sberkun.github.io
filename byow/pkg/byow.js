@@ -198,10 +198,11 @@ export class Binding {
     * @param {any} ctx
     * @param {number} window_width
     * @param {number} window_height
+    * @param {number} timestamp
     */
-    draw_animation_frame(ctx, window_width, window_height) {
+    draw_animation_frame(ctx, window_width, window_height, timestamp) {
         try {
-            wasm.binding_draw_animation_frame(this.ptr, addBorrowedObject(ctx), window_width, window_height);
+            wasm.binding_draw_animation_frame(this.ptr, addBorrowedObject(ctx), window_width, window_height, timestamp);
         } finally {
             heap[stack_pointer++] = undefined;
         }
@@ -242,15 +243,15 @@ async function load(module, imports) {
 function getImports() {
     const imports = {};
     imports.wbg = {};
-    imports.wbg.__wbg_setItem_609e6d7f52599536 = function(arg0, arg1, arg2, arg3, arg4) {
-        getObject(arg0).setItem(getStringFromWasm0(arg1, arg2), getStringFromWasm0(arg3, arg4));
-    };
     imports.wbg.__wbg_getItem_367c26f3c16d8636 = function(arg0, arg1, arg2, arg3) {
         const ret = getObject(arg1).getItem(getStringFromWasm0(arg2, arg3));
         var ptr0 = isLikeNone(ret) ? 0 : passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len0 = WASM_VECTOR_LEN;
         getInt32Memory0()[arg0 / 4 + 1] = len0;
         getInt32Memory0()[arg0 / 4 + 0] = ptr0;
+    };
+    imports.wbg.__wbg_setItem_609e6d7f52599536 = function(arg0, arg1, arg2, arg3, arg4) {
+        getObject(arg0).setItem(getStringFromWasm0(arg1, arg2), getStringFromWasm0(arg3, arg4));
     };
     imports.wbg.__wbg_setfillcolor_6c00afcd1f2d6e98 = function(arg0, arg1) {
         set_fill_color(getObject(arg0), arg1 >>> 0);

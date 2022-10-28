@@ -54,8 +54,8 @@
         };
 
         let cheese = Binding.new(window.localStorage);
-        (function animation_loop() {
-          cheese.draw_animation_frame(ctx, canvas.width, canvas.height);
+        (function animation_loop(timestamp) {
+          cheese.draw_animation_frame(ctx, canvas.width, canvas.height, timestamp);
           requestAnimationFrame(animation_loop);
         })();
 
