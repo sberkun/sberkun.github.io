@@ -6,43 +6,34 @@ struct Ticket(u64);
 
 
 
-pub trait AsyncContext<T> {
-    fn sleep(self, ns: usize, callback: fn(Self, &mut T) -> Token) -> Token;
-    fn u32toi32(self, inp: u32, callback: fn(Self, &mut T, i32) -> Token) -> Token;
+pub trait AsyncContext {
+    fn noop(self, callback: fn(Self) -> Token) -> Token;
+    fn sleep(self, ns: usize, callback: fn(Self) -> Token) -> Token;
+    fn u32toi32(self, inp: u32, callback: fn(Self, i32) -> Token) -> Token;
 }
 
-
-
-/// upper "large data object" needs a method to get the inner MyFuture
-/// and needs a callback to process final return type
-
-pub trait Extractor<AC, I: ?Sized, Out> where AC: AsyncContext<Self::T> {
-    type T; // outer future type
-    fn extract(t: &mut Self::T) -> &mut I;
-    fn continuation(ctx: AC, t: &mut Self::T, output: Out) -> Token;
+pub trait Extractor<AC, I: ?Sized, Out> {
+    fn extract(ctx: &mut AC) -> &mut I;
+    fn continuation(ctx: AC, output: Out) -> Token;
 }
 
-
-pub trait Future<AC, E> where AC: AsyncContext<E::T>, E: Extractor<AC, Self, Self::Out> {
+pub trait Future<AC, E> where E: Extractor<AC, Self, Self::Out> {
     type Inp; // input type
     type Out; // output type
-    fn start(ctx: AC, outer: &mut E::T, inp: Self::Inp) -> Token;
+    fn start(ctx: AC, inp: Self::Inp) -> Token;
 }
 
 
 struct InnerFuture {}
 
 
-impl<AC: AsyncContext<E::T>, E: Extractor<AC, InnerFuture, i32>> Future<AC, E> for InnerFuture {
+impl<AC: AsyncContext, E: Extractor<AC, Self, i32>> Future<AC, E> for InnerFuture {
     type Inp = u32;
 
     type Out = i32;
 
-    fn start(ctx: AC, outer: &mut E::T, inp: u32) -> Token {
-        let _cheese = E::extract(outer);
-        // do stuff
-
-        ctx.u32toi32(inp, Self::after_wait::<AC, E>)
+    fn start(mut ctx: AC, inp: u32) -> Token {
+        Self::step1::<AC, E>(ctx, inp)
     }
 }
 
@@ -50,15 +41,75 @@ impl InnerFuture {
     fn new() -> InnerFuture {
         InnerFuture{}
     }
-    fn after_wait<AC: AsyncContext<E::T>, E: Extractor<AC, InnerFuture, i32>>(ctx: AC, outer: &mut E::T, inp: i32) -> Token {
+
+    fn step1<AC: AsyncContext, E: Extractor<AC, Self, i32>>(mut ctx: AC, inp: u32) -> Token {
+        let _cheese = E::extract(&mut ctx);
+        // do stuff
+
+        ctx.u32toi32(inp, Self::step2::<AC, E>)
+    }
+
+    fn step2<AC: AsyncContext, E: Extractor<AC, Self, i32>>(ctx: AC, inp: i32) -> Token {
         // do stuff
         
-        E::continuation(ctx, outer, inp)
+        E::continuation(ctx, inp)
     }
 }
 
 
+/*
+
+struct OuterFuture {
+    cheese: u32,
+    a: InnerFuture,
+    b: InnerFuture
+}
 
 
+struct EA<E> {
+    inner: E
+}
+impl<AC, E> Extractor<AC, InnerFuture, i32> for EA<E>
+    where E: Extractor<AC, OuterFuture, ()> {
+    fn extract(ctx: &mut AC) -> &mut InnerFuture {
+        todo!()
+    }
+
+    fn continuation(ctx: AC, output: i32) -> Token {
+        todo!()
+    }
+}
 
 
+impl<AC: AsyncContext, E: Extractor<AC, Self, ()>> Future<AC, E> for OuterFuture {
+    type Inp = u32;
+
+    type Out = ();
+
+    fn start(ctx: AC, inp: Self::Inp) -> Token {
+        Self::step1::<AC, E>(ctx, inp)
+    }
+}
+
+impl OuterFuture {
+    fn step1<AC: AsyncContext, E: Extractor<AC, Self, ()>>(mut ctx: AC, inp: u32) -> Token {
+        E::extract(&mut ctx).cheese = inp;
+
+        struct E2 {}
+        impl<AC> Extractor<AC, InnerFuture, i32> for E2 {
+            fn extract(ctx: &mut AC) -> &mut InnerFuture {
+                todo!()
+            }
+        
+            fn continuation(ctx: AC, output: i32) -> Token {
+                todo!()
+            }
+        }
+
+
+        <InnerFuture as Future<AC, E>>::start(ctx, inp)
+    }
+
+}
+
+ */
