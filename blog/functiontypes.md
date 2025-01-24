@@ -1,5 +1,14 @@
 # Functions Should Have Types
 
+
+## Notes
+
+Effekt language blocks
+
+
+## Content
+
+
 Suppose you have a function that takes a callback. In Rust, you might write it like so:
 
 ```rust
