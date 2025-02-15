@@ -1,53 +1,53 @@
 
 
 
-pub trait BasicAsyncTask {
-    fn noop(&mut self, callback: fn(&mut Self));
-    fn sleep(&mut self, ns: usize, callback: fn(&mut Self));
-    fn u32toi32(&mut self, inp: u32, callback: fn(&mut Self, i32));
-}
-
-
-// pub trait BetterAsyncTask: Sized {
-//     type NoopFT: Future<Self> where NoopTF::Inp = (), NoopFT::Out = ();
-// }
-
-
-pub trait Extractor<T, F: Future<T> + ?Sized> {
+pub trait Embedding<T: ?Sized, F: ?Sized, O> {
     fn extract(task: &mut T) -> &mut F;
-    fn continuation(task: &mut T, output: F::Out);
+    fn continuation(task: &mut T, output: O);
 }
 
-pub trait Future<T> {
-    type Inp; // input type
-    type Out; // output type
-    fn start<E: Extractor<T, Self>>(task: &mut T, inp: Self::Inp);
+pub trait Future<T: ?Sized, I, O> {
+    fn start<E: Embedding<T, Self, O>>(task: &mut T, inp: I);
+}
+
+pub trait BasicAsyncTask {
+    type NoopFT: Default + Future<Self, (), ()>;
+    type Sleep: Default + Future<Self, usize, ()>;
+    type U32ToI32: Default + Future<Self, u32, i32>;
 }
 
 
-struct InnerFuture {}
 
+struct InnerFuture<T: BasicAsyncTask> {
+    tt: T::U32ToI32
+}
 
-impl<T: BasicAsyncTask> Future<T> for InnerFuture {
-    type Inp = u32;
-
-    type Out = i32;
-
-    fn start<E: Extractor<T, Self>>(task: &mut T, inp: u32) {
+impl<T: BasicAsyncTask> Future<T, u32, i32> for InnerFuture<T> {
+    fn start<E: Embedding<T, Self, i32>>(task: &mut T, inp: u32) {
         let _cheese = E::extract(task);
         // do stuff
 
-        task.u32toi32(inp, |t, a| {
-            let _ewiorfj = E::extract(t);
-            // do stuff
+        T::U32ToI32::start::<IFE<E>>(task, inp);
+    }
+}
 
-            E::continuation(t, a)
-        })
+struct IFE<E>(E);
+impl<T: BasicAsyncTask, E: Embedding<T, InnerFuture<T>, i32>> Embedding<T, T::U32ToI32, i32> for IFE<E> {
+    fn extract(task: &mut T) -> &mut T::U32ToI32 {
+        &mut E::extract(task).tt
+    }
+
+    fn continuation(task: &mut T, output: i32) {
+        let _cheese = E::extract(task);
+
+        E::continuation(task, output);
     }
 }
 
 
 
+
+/*
 
 
 struct OuterFuture {
@@ -171,3 +171,5 @@ mod builtins {
 
 
 }
+
+*/
