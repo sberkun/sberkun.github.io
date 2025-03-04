@@ -1,13 +1,30 @@
 
 
+/**
+ * 
+ * Comments 3/2/2025
+ * 
+ * go back to T -> Token setup
+ *    - embedding includes callback
+ * use type Parallel<F1, F2> to handle simultanious calls
+ *     - idk if there's a solution to "static # parallelism"
+ * 
+ * pin embedding: &mut T -> Pin<&mut self>
+ * T is a wrapper around Pin<&mut something> under the hood
+ * 
+ * still not reaaaly safe. possible things that could go wrong
+ *     - runtime could call callback twice
+ *     - forget to do setup before calling inner future (since raw unions)
+ * 
+ */
 
-pub trait Embedding<T: ?Sized, F: ?Sized, O> {
+
+pub trait Embedding<T: ?Sized, F: ?Sized> {
     fn extract(task: &mut T) -> &mut F;
-    fn continuation(task: &mut T, output: O);
 }
 
 pub trait Future<T: ?Sized, I, O> {
-    fn start<E: Embedding<T, Self, O>>(task: &mut T, inp: I);
+    fn start<E: Embedding<T, Self>, F: FnOnce(O)>(task: &mut T, inp: I, continuation: F);
 }
 
 pub trait BasicAsyncTask {
@@ -16,7 +33,19 @@ pub trait BasicAsyncTask {
     type U32ToI32: Default + Future<Self, u32, i32>;
 }
 
+struct InnerFuture<T: BasicAsyncTask> {
+    tt: T::U32ToI32
+}
 
+impl<T: BasicAsyncTask> Future<T, u32, i32> for InnerFuture<T> {
+    fn start<E: Embedding<T, Self>, F: FnOnce(i32)>(task: &mut T, inp: u32, continuation: F) {
+        let _cheese = E::extract(task);
+    }
+}
+
+
+
+/*
 
 struct InnerFuture<T: BasicAsyncTask> {
     tt: T::U32ToI32
@@ -44,7 +73,7 @@ impl<T: BasicAsyncTask, E: Embedding<T, InnerFuture<T>, i32>> Embedding<T, T::U3
     }
 }
 
-
+ */
 
 
 /*

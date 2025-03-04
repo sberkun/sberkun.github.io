@@ -94,3 +94,13 @@ fn load_data() -> Vec<u8> {
 This looks great! However, we now have a fairly large hurdle: how do we implement `sleep`? More generally, how do we implement a runtime?
 
 One idea is for sleep to store the callback in some global task queue. 
+
+
+ - problem: need to box the savestate every time
+ - dynamic allocations bad!
+ - solution? have future specify some type that is large enough to hold savestates
+ - enter `machines.rs`
+ - problem: pin
+ - enter `wheel.rs`
+ - problem: api in `wheel.rs` is really really bad
+ - no solution

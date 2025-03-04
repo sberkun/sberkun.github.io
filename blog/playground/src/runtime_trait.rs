@@ -58,7 +58,7 @@ async fn read_whole_file(file_name: &str) -> Vec<u8> {
 */
 
 fn read_whole_file<C: AsyncContext, F: FnOnce(C, Vec<u8>) -> Token>(ctx: C, cont: F, file_name: &str) -> Token {
-
+    todo!()
 }
 
 
